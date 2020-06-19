@@ -3,7 +3,7 @@
  
 ### 環境需求
 `
-pip install osuapi pandas numpy request
+pip install osuapi pandas numpy request pyecharts
 `
 
 ### 項目
@@ -28,5 +28,6 @@ rank數量(map set)及總遊玩次數
 做圖平均BPM  
 
 ### TODO
+- [X] 沒有上傳過圖、沒有Rank圖
 - [ ] user name does not exist
-- [ ] visualize
+- [ ] visualize (50%)
