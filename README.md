@@ -28,6 +28,8 @@ rank數量(map set)及總遊玩次數
 做圖平均BPM  
 
 ### TODO
-- [X] 沒有上傳過圖、沒有Rank圖
 - [ ] user name does not exist
-- [ ] visualize (50%)
+- [ ] not a mapper
+- [X] visualize - Pie
+- [ ] visualize - mapset image
+- [ ] Grid
