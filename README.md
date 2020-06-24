@@ -31,5 +31,6 @@ rank數量(map set)及總遊玩次數
 - [ ] user name does not exist
 - [ ] not a mapper
 - [X] visualize - Pie
-- [ ] visualize - mapset image
-- [ ] Grid
+- [X] visualize - beatmap cover image
+- [X] visualize - mapper profile image
+- [X] Grid
