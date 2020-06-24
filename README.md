@@ -3,7 +3,7 @@
  
 ### 環境需求
 `
-pip install osuapi pandas numpy request
+pip install osuapi pandas numpy request pyecharts
 `
 
 ### 項目
@@ -29,4 +29,7 @@ rank數量(map set)及總遊玩次數
 
 ### TODO
 - [ ] user name does not exist
-- [ ] visualize
+- [ ] not a mapper
+- [X] visualize - Pie
+- [ ] visualize - mapset image
+- [ ] Grid
