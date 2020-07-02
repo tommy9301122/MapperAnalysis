@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import numpy as np
 import warnings
@@ -14,6 +15,36 @@ from osuapi import OsuApi, ReqConnector, OsuMode
 import requests
 api = OsuApi("13a36d70fd32e2f87fd2a7a89e4f52d54ab337a1", connector=ReqConnector())
 
+user_name = input('Please enter osu! user name:')
+
+
+#######################  get mapper beatmaps info  #######################
+
+try:
+    beatmap_list= api.get_beatmaps(since=None, beatmapset_id=None, beatmap_id=None, username=user_name, mode=None, include_converted=True, beatmap_hash=None, limit=500)    
+    df_beatmap = pd.DataFrame()
+    for beatmap in beatmap_list:
+        df_beatmap_1 = pd.DataFrame( dict(beatmap), index=[0])
+        df_beatmap = df_beatmap.append(df_beatmap_1, ignore_index=True)
+except:
+    print('No results for user name')
+    sys.exit()
+
+if len(beatmap_list)==0:
+    print('Player has no map')
+    sys.exit()
+
+
+#######################  data collation  #######################
+
+df_beatmap['map_len'] = df_beatmap.last_update - df_beatmap.submit_date
+df_beatmap['total_length_class'] = df_beatmap['total_length'].apply(lambda x:'< 1:39' if x<99 else('1:39 ~ 3:29' if x>=99 and x<209 else('3:39 ~ 5:00' if x>=209 and x<300 else '> 5:00')))
+df_beatmap['star_rating'] = df_beatmap['difficultyrating'].apply(lambda x:'Easy'if x<2 else('Normal' if x>=2 and x<2.7 else('Hard' if x>=2.7 and x<4 else('Insane' if x>=4 and x<5.3 else('Expert' if x>=5.3 and x<6.5 else 'Expert+')))))
+df_beatmap['cover_image'] = ['https://assets.ppy.sh/beatmaps/'+str(i)+'/covers/cover.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
+df_beatmap['thumbnail'] = ['https://b.ppy.sh/thumb/'+str(i)+'l.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
+
+user_id = dict(api.get_user(user_name)[0]).get('user_id')
+user_profile_image = 'http://s.ppy.sh/a/'+str(user_id)
 
 def parse_date(td):
     resYear = float(td.days)/364.0  
@@ -22,26 +53,6 @@ def parse_date(td):
     resDay = int(td.days-(364*resYear+30*resMonth))
     return str(resYear) + ' years ' + str(resMonth) + ' months and ' + str(resDay) + ' days'
 
-
-user_name = input('Please enter osu! user name:')
-
-########################################  資料整理  ##########################################
-
-beatmap_list= api.get_beatmaps(since=None, beatmapset_id=None, beatmap_id=None, username=user_name, mode=None, include_converted=True, beatmap_hash=None, limit=500)
-df_beatmap = pd.DataFrame()
-for beatmap in beatmap_list:
-    df_beatmap_1 = pd.DataFrame( dict(beatmap), index=[0])
-    df_beatmap = df_beatmap.append(df_beatmap_1, ignore_index=True)
-    
-df_beatmap['map_len'] = df_beatmap.last_update - df_beatmap.submit_date
-df_beatmap['total_length_class'] = df_beatmap['total_length'].apply(lambda x:'< 1:39' if x<99 else('1:39 ~ 3:29' if x>=99 and x<209 else('3:39 ~ 5:00' if x>=209 and x<300 else '> 5:00')))
-df_beatmap['star_rating'] = df_beatmap['difficultyrating'].apply(lambda x:'Easy'if x<2 else('Normal' if x>=2 and x<2.7 else('Hard' if x>=2.7 and x<4 else('Insane' if x>=4 and x<5.3 else('Expert' if x>=5.3 and x<6.5 else 'Expert+')))))
-df_beatmap['cover_image'] = ['https://assets.ppy.sh/beatmaps/'+str(i)+'/covers/cover.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
-df_beatmap['thumbnail'] = ['https://b.ppy.sh/thumb/'+str(i)+'l.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
-
-# 頭像
-user_id = dict(api.get_user(user_name)[0]).get('user_id')
-user_profile_image = 'http://s.ppy.sh/a/'+str(user_id)
 
 # 做圖年齡
 try:
@@ -83,16 +94,17 @@ try:
 
     # 第一張Rank圖日期
     first_rank_date = df_beatmap.loc[df_beatmap.approved_date.notnull()].groupby('beatmapset_id').first().approved_date.min()
-    first_rank_date_str = first_rank_date.strftime('%Y-%m-%d')
-    
+    first_rank_date_str = 'Approved date: '+first_rank_date.strftime('%Y-%m-%d')
+
     # 開始作圖後多久rank
-    rank_spend_time = first_rank_date - first_submit_date
-    rank_spend_time_str = parse_date(rank_spend_time)
-    rank_spend_time_str = '開始作圖後花了 '+rank_spend_time_str+' Rank了第一張圖'
-    
+    #rank_spend_time = first_rank_date - first_submit_date
+    #rank_spend_time_str = parse_date(rank_spend_time)
+    #rank_spend_time_str = '開始作圖後花了 '+rank_spend_time_str+' Rank了第一張圖'
+
 except:
-    first_rank_title = '未上榜'
-    first_rank_date_str = '未上榜'
+    first_rank_title = 'This mapper'
+    first_rank_image = ''
+    first_rank_date_str = 'has no rank map'
     rank_spend_time_str = ''
     pass
 
@@ -102,6 +114,7 @@ longest_mapping_map_image = df_beatmap.sort_values(by='map_len', ascending=False
 
 # 花最多時間
 longest_mapping_len = df_beatmap.sort_values(by='map_len', ascending=False).iloc[0].map_len
+
 
 # 遊戲模式
 df_mode = df_beatmap['mode'].value_counts().to_frame()
@@ -137,7 +150,7 @@ df_star = df_star.reset_index()
 df_star['Star'] = df_star['Star'].astype('str')
 
 
-########################################  視覺化輸出  ##########################################
+#######################  data visualize  #######################
 
 C = Collector()
 
@@ -155,7 +168,7 @@ def mapper_table():
             ["Playcount", rank_set_playcount],
             ["Favourite", int(favourite_count)]]
     mapper_table = (Table().add(headers, rows))
-    
+
     return mapper_table
 
 @C.funcs
@@ -171,7 +184,7 @@ def first_rank_img():
     first_rank_img = (Image()
                  .add(src=(first_rank_image),style_opts={"width": "320px", "height": "100px", "style": "margin-left: 10px"})
                  .set_global_opts(title_opts=ComponentTitleOpts(title="First Rank Map",
-                                                                subtitle=str(first_rank_title)+'\n'+'Approved date: '+first_rank_date_str),))
+                                                                subtitle=str(first_rank_title)+'\n'+first_rank_date_str),))
     return first_rank_img
 
 @C.funcs
@@ -179,8 +192,7 @@ def efforts_map_img():
     efforts_map_img = (Image()
                    .add(src=(longest_mapping_map_image),style_opts={"width": "320px", "height": "100px", "style": "margin-left: 10px"})
                    .set_global_opts(title_opts=ComponentTitleOpts(title="Efforts Mapping Map",
-                                                                  subtitle=str(longest_mapping_map)+'\n'+'Spend time : '+parse_date(longest_mapping_len)))
-                  )
+                                                                  subtitle=str(longest_mapping_map)+'\n'+'Spend time : '+parse_date(longest_mapping_len),)))
     return efforts_map_img
 
 @C.funcs
@@ -192,6 +204,7 @@ def grid_test():
                      center=["12%", "35%"],   #圓餅圖位置
                      radius=["40%", "55%"],   #圓餅內外圈半徑
                      label_opts=opts.LabelOpts(is_show=False, position="center")  )
+
                 .set_colors(["#fc636b", "#ffb900", "#6a67ce", "#50667f", "#1aafd0", "#3be8b0"])
                 .set_global_opts(title_opts=opts.TitleOpts(title="Mode", pos_left="10%", pos_top="30%"),  
                                  legend_opts=opts.LegendOpts(orient="vertical", pos_left="0%", pos_top="10%")  )
@@ -218,6 +231,7 @@ def grid_test():
                       center=["52%", "35%"], 
                       radius=["40%", "55%"], 
                       label_opts=opts.LabelOpts(is_show=False, position="center")  )
+
                  .set_colors(["#fc636b", "#ffb900", "#6a67ce", "#50667f", "#1aafd0", "#3be8b0"])
                  .set_global_opts(title_opts=opts.TitleOpts(title="Genre", pos_left="50%", pos_top="30%"),
                                   legend_opts=opts.LegendOpts(orient="vertical", pos_left="40%", pos_top="10%")  )
@@ -231,6 +245,7 @@ def grid_test():
                        center=["72%", "35%"], 
                        radius=["40%", "55%"], 
                        label_opts=opts.LabelOpts(is_show=False, position="center")  )
+
                   .set_colors(["#fc636b", "#ffb900", "#6a67ce", "#50667f", "#1aafd0", "#3be8b0"])
                   .set_global_opts(title_opts=opts.TitleOpts(title="Length", pos_left="69.6%", pos_top="30%"),
                                    legend_opts=opts.LegendOpts(orient="vertical", pos_left="60%", pos_top="10%")  )
@@ -244,13 +259,15 @@ def grid_test():
                           center=["92%", "35%"], 
                           radius=["40%", "55%"], 
                           label_opts=opts.LabelOpts(is_show=False, position="center")  )
+
                      .set_colors(["#fc636b", "#ffb900", "#6a67ce", "#50667f", "#1aafd0", "#3be8b0"])
                      .set_global_opts(title_opts=opts.TitleOpts(title="Star Rating", pos_left="88.4%", pos_top="30%"),
                                       legend_opts=opts.LegendOpts(orient="vertical", pos_left="80%", pos_top="10%")  )
                      .set_series_opts(tooltip_opts=opts.TooltipOpts(trigger="item", formatter="{a} <br/>{b}: {c} ({d}%)")  )
                     )
-    
+
     return Grid(init_opts=opts.InitOpts(width="1500px", height="250px")).add(Mode_pie, grid_opts=opts.GridOpts()).add(Language_pie, grid_opts=opts.GridOpts()).add(Genre_pie, grid_opts=opts.GridOpts()).add(Length_pie, grid_opts=opts.GridOpts()).add(Star_Rating_pie, grid_opts=opts.GridOpts())
 
+
 Page(layout=Page.SimplePageLayout).add(*[fn() for fn, _ in C.charts]).render(user_name+"'s Mapping Analysis.html")
-print('完成')
+print('Done!')
