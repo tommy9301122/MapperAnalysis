@@ -1,36 +1,33 @@
 # osu! Mapper Analysis
  osu! mapper analysis  
  
-### 環境需求
+### Requirements
 `
 pip install osuapi pandas numpy request pyecharts
 `
 
-### 項目
-* **麻婆資訊**:  
-做圖年齡(第一次上傳圖~最後一次上傳圖)  
-做圖數量(map set)  
-rank數量(map set)及總遊玩次數  
-總收藏數量  
+### Analysis Info
+* **Achievement**:  
+Mapping Age (first map submit date ~ last map update date)  
+Map set amount  
+Rank map set amount  
+Favourite count  
 
-* **麻婆做圖史**:  
-第一張圖及第一次上傳時間  
-第一張Rank圖及上榜時間  
-開始作圖後花了多久Rank了第一張圖  
-花最多時間mapping的圖及花費的時間  
+* **Map set**:  
+First map and submit date  
+First rank map and approved date  
+Efforts map and spend time  
 
-* **麻婆風格統計**:  
-模式統計  
-歌曲語言統計  
-歌曲類型統計  
-圖長統計  
-難度統計  
-做圖平均BPM  
+* **Style**:  
+Mode  
+Language  
+Genre  
+Length  
+Star rating  
+BPM(X)  
 
 ### TODO
-- [ ] user name does not exist
-- [ ] not a mapper
-- [X] visualize - Pie
-- [X] visualize - beatmap cover image
-- [X] visualize - mapper profile image
-- [X] Grid
+- [ ] try ( user name not exist 、 not a mapper 、 no rank map )
+- [X] visualize ( Pie 、 beatmap cover image 、 mapper profile image )
+- [X] html output
+- [ ] pyinstaller
