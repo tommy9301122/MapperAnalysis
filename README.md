@@ -27,7 +27,7 @@ Star rating
 BPM(X)  
 
 ### TODO
-- [ ] try ( user name not exist 、 not a mapper 、 no rank map )
+- [X] try ( user name not exist 、 not a mapper 、 no rank map )
 - [X] visualize ( Pie 、 beatmap cover image 、 mapper profile image )
 - [X] html output
 - [ ] pyinstaller
