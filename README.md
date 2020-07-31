@@ -30,3 +30,4 @@ BPM(X)
 - [X] try ( user name not exist 、 not a mapper 、 no rank map )
 - [X] visualize ( Pie 、 beatmap cover image 、 mapper profile image )
 - [X] html output
+- [ ] no longer use osu api python package 
