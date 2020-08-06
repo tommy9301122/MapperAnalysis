@@ -33,11 +33,11 @@ except:
 if len(beatmap_list)==0:
     print('Player has no map')
     sys.exit()
-
-
+    
+    
 #######################  data collation  #######################
 
-df_beatmap['map_len'] = df_beatmap.last_update - df_beatmap.submit_date
+df_beatmap['mapping_len'] = df_beatmap.last_update - df_beatmap.submit_date
 df_beatmap['total_length_class'] = df_beatmap['total_length'].apply(lambda x:'< 1:39' if x<99 else('1:39 ~ 3:29' if x>=99 and x<209 else('3:39 ~ 5:00' if x>=209 and x<300 else '> 5:00')))
 df_beatmap['star_rating'] = df_beatmap['difficultyrating'].apply(lambda x:'Easy'if x<2 else('Normal' if x>=2 and x<2.7 else('Hard' if x>=2.7 and x<4 else('Insane' if x>=4 and x<5.3 else('Expert' if x>=5.3 and x<6.5 else 'Expert+')))))
 df_beatmap['cover_image'] = ['https://assets.ppy.sh/beatmaps/'+str(i)+'/covers/cover.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
@@ -54,52 +54,44 @@ def parse_date(td):
     return str(resYear) + ' years ' + str(resMonth) + ' months and ' + str(resDay) + ' days'
 
 
-# 做圖年齡
-try:
-    first_map_submit_date = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].submit_date
-    last_map_update_date = df_beatmap.sort_values(by='last_update', ascending=False).iloc[0].last_update
-    mapping_age = last_map_update_date-first_map_submit_date
-    mapping_age_str = parse_date(mapping_age)
-except:
-    mapping_age_str = '未作圖'
+# mapping age
+first_map_submit_date = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].submit_date
+last_map_update_date = df_beatmap.sort_values(by='last_update', ascending=False).iloc[0].last_update
+mapping_age = last_map_update_date-first_map_submit_date
+mapping_age_str = parse_date(mapping_age)
 
-# map set數
+# map set
 map_set_count = len(df_beatmap.beatmapset_id.value_counts())
 
-# Rank 數
+# Rank
 rank_set_count = len(df_beatmap.loc[df_beatmap.approved_date.notnull()].beatmapset_id.value_counts())
 
 # playcount
 rank_set_playcount = df_beatmap.playcount.sum()
 
-# 收藏數
+# favourite
 favourite_count = df_beatmap.groupby('beatmapset_id').mean().favourite_count.sum()
 
-try:
-    # 第一張圖
-    first_map_title = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].title
-    first_map_image = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].cover_image
+# first map
+first_map_title = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].title
+first_map_image = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].cover_image
 
-    # 第一張圖上傳日期
-    first_submit_date = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].submit_date
-    first_submit_date_str = first_submit_date.strftime('%Y-%m-%d')
-except:
-    first_map_title = '未上傳'
-    first_submit_date_str = '未上傳'
+# first submit date
+first_submit_date = df_beatmap.sort_values(by='submit_date', ascending=True).iloc[0].submit_date
+first_submit_date_str = first_submit_date.strftime('%Y-%m-%d')
 
 try:
-    # 第一張Rank圖
+    # first rank map
     first_rank_title = df_beatmap.loc[df_beatmap.approved_date.notnull()].groupby('beatmapset_id').first().sort_values(by='approved_date', ascending=True).iloc[0].title
     first_rank_image = df_beatmap.loc[df_beatmap.approved_date.notnull()].groupby('beatmapset_id').first().sort_values(by='approved_date', ascending=True).iloc[0].cover_image
 
-    # 第一張Rank圖日期
+    # first approved date
     first_rank_date = df_beatmap.loc[df_beatmap.approved_date.notnull()].groupby('beatmapset_id').first().approved_date.min()
     first_rank_date_str = 'Approved date: '+first_rank_date.strftime('%Y-%m-%d')
 
-    # 開始作圖後多久rank
+    # first rank spend time
     #rank_spend_time = first_rank_date - first_submit_date
     #rank_spend_time_str = parse_date(rank_spend_time)
-    #rank_spend_time_str = '開始作圖後花了 '+rank_spend_time_str+' Rank了第一張圖'
 
 except:
     first_rank_title = 'This mapper'
@@ -108,42 +100,41 @@ except:
     rank_spend_time_str = ''
     pass
 
-# 花最多時間mapping的圖
-longest_mapping_map = df_beatmap.sort_values(by='map_len', ascending=False).iloc[0].title
-longest_mapping_map_image = df_beatmap.sort_values(by='map_len', ascending=False).iloc[0].cover_image
+# efforts map
+longest_mapping_map = df_beatmap.sort_values(by='mapping_len', ascending=False).iloc[0].title
+longest_mapping_map_image = df_beatmap.sort_values(by='mapping_len', ascending=False).iloc[0].cover_image
 
-# 花最多時間
-longest_mapping_len = df_beatmap.sort_values(by='map_len', ascending=False).iloc[0].map_len
+# efforts map spend time
+longest_mapping_len = df_beatmap.sort_values(by='mapping_len', ascending=False).iloc[0].mapping_len
 
-
-# 遊戲模式
+# statistics - mode
 df_mode = df_beatmap['mode'].value_counts().to_frame()
 df_mode.index.name = 'Mode'
 df_mode = df_mode.reset_index()
 df_mode['Mode'] = df_mode['Mode'].astype('str')
 df_mode['Mode'] = df_mode['Mode'].str.replace('osu!', '')
 
-# 歌曲語言
+# statistics - language
 df_Language = df_beatmap.groupby('beatmapset_id').first()['language_id'].value_counts().to_frame()
 df_Language.index.name = 'Language'
 df_Language = df_Language.reset_index()
 df_Language['Language'] = df_Language['Language'].astype('str')
 df_Language['Language'] = df_Language['Language'].str.replace('BeatmapLanguage.', '')
 
-# 歌曲類型
+# statistics - genre
 df_genre = df_beatmap.groupby('beatmapset_id').first()['genre_id'].value_counts().to_frame()
 df_genre.index.name = 'genre'
 df_genre = df_genre.reset_index()
 df_genre['genre'] = df_genre['genre'].astype('str')
 df_genre['genre'] = df_genre['genre'].str.replace('BeatmapGenre.', '')
 
-# 圖長統計
+# statistics - length
 df_length = df_beatmap.groupby('beatmapset_id').first()['total_length_class'].value_counts().to_frame()
 df_length.index.name = 'Length'
 df_length = df_length.reset_index()
 df_length['Length'] = df_length['Length'].astype('str')
 
-# 難度統計
+# statistics - star rating
 df_star = df_beatmap['star_rating'].value_counts().to_frame()
 df_star.index.name = 'Star'
 df_star = df_star.reset_index()
@@ -201,8 +192,8 @@ def grid_test():
                 Pie()
                 .add("Mode",
                      df_mode.values.tolist(),
-                     center=["12%", "35%"],   #圓餅圖位置
-                     radius=["40%", "55%"],   #圓餅內外圈半徑
+                     center=["12%", "35%"],
+                     radius=["40%", "55%"],
                      label_opts=opts.LabelOpts(is_show=False, position="center")  )
 
                 .set_colors(["#fc636b", "#ffb900", "#6a67ce", "#50667f", "#1aafd0", "#3be8b0"])
@@ -268,6 +259,6 @@ def grid_test():
 
     return Grid(init_opts=opts.InitOpts(width="1500px", height="250px")).add(Mode_pie, grid_opts=opts.GridOpts()).add(Language_pie, grid_opts=opts.GridOpts()).add(Genre_pie, grid_opts=opts.GridOpts()).add(Length_pie, grid_opts=opts.GridOpts()).add(Star_Rating_pie, grid_opts=opts.GridOpts())
 
-
-Page(layout=Page.SimplePageLayout).add(*[fn() for fn, _ in C.charts]).render(user_name+"'s Mapping Analysis.html")
+today = date.today().strftime("%Y%m%d")
+Page(layout=Page.SimplePageLayout).add(*[fn() for fn, _ in C.charts]).render(user_name+"'s Mapping Analysis_"+today+".html")
 print('Done!')
