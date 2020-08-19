@@ -4,6 +4,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 import datetime
+from datetime import date
 from pyecharts import options as opts
 from pyecharts.charts import Bar, Page, Pie, Grid
 from pyecharts.faker import Collector, Faker
@@ -40,8 +41,8 @@ if len(beatmap_list)==0:
 df_beatmap['mapping_len'] = df_beatmap.last_update - df_beatmap.submit_date
 df_beatmap['total_length_class'] = df_beatmap['total_length'].apply(lambda x:'< 1:39' if x<99 else('1:39 ~ 3:29' if x>=99 and x<209 else('3:39 ~ 5:00' if x>=209 and x<300 else '> 5:00')))
 df_beatmap['star_rating'] = df_beatmap['difficultyrating'].apply(lambda x:'Easy'if x<2 else('Normal' if x>=2 and x<2.7 else('Hard' if x>=2.7 and x<4 else('Insane' if x>=4 and x<5.3 else('Expert' if x>=5.3 and x<6.5 else 'Expert+')))))
-df_beatmap['cover_image'] = ['https://assets.ppy.sh/beatmaps/'+str(i)+'/covers/cover.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
-df_beatmap['thumbnail'] = ['https://b.ppy.sh/thumb/'+str(i)+'l.jpg' for i in df_beatmap['beatmapset_id'].to_list()]
+df_beatmap['cover_image'] = ['https://assets.ppy.sh/beatmaps/'+str(i)+'/covers/cover.jpg' for i in list(df_beatmap['beatmapset_id'])]
+df_beatmap['thumbnail'] = ['https://b.ppy.sh/thumb/'+str(i)+'l.jpg' for i in list(df_beatmap['beatmapset_id'])]
 
 user_id = dict(api.get_user(user_name)[0]).get('user_id')
 user_profile_image = 'http://s.ppy.sh/a/'+str(user_id)
