@@ -1,6 +1,6 @@
 # osu! Mapper Analysis
 [osu! mapper analysis](https://wdt7abezis0umcomnrswrq-on.drv.tw/osuMapperAnalysis_YamYA/)  
-[My osu! profile](https://osu.ppy.sh/users/4470854)  
+
 
 ### Requirements
 `
@@ -28,3 +28,4 @@ Star rating
 BPM(X)  
 
 
+[My osu! profile](https://osu.ppy.sh/users/4470854)  
