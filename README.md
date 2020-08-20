@@ -1,6 +1,7 @@
 # osu! Mapper Analysis
- osu! mapper analysis  
- 
+[osu! mapper analysis](https://wdt7abezis0umcomnrswrq-on.drv.tw/osuMapperAnalysis_YamYA/)  
+[My osu! profile](https://osu.ppy.sh/users/4470854)  
+
 ### Requirements
 `
 pip install osuapi pandas numpy request pyecharts
@@ -26,8 +27,4 @@ Length
 Star rating  
 BPM(X)  
 
-### TODO
-- [X] try ( user name not exist 、 not a mapper 、 no rank map )
-- [X] visualize ( Pie 、 beatmap cover image 、 mapper profile image )
-- [X] html output
-- [ ] no longer use osu api python package 
+
